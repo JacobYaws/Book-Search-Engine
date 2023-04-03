@@ -4,15 +4,18 @@ const path = require('path');
 const { authMiddleware } = require('./utils/auth');
 const { typeDefs, resolvers} = require('./schemas');
 const db = require('./config/connection');
-// const routes = require('./routes');
 require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+// server will hold the typeDefs, resolvers, and context needed to start the application. Playground and introspection were also added to get the /graphql endpoint to work.
 const server = new ApolloServer({
   typeDefs,
   resolvers,
   context: authMiddleware,
+  playground: true,
+  introspection: true
 });
 
 app.use(express.urlencoded({ extended: true }));
@@ -23,20 +26,13 @@ if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '../client/build')));
 }
 
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../client/ApolloError: Response not successful: Received status code 500'))
-})
-
+// Directs the webpage to display /client/build/index.html when at the '/' endpoint.
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../client/build/index.html'))
 })
 
-// app.use(routes);
 
-// app.get('*', (req, res) => {
-//   res.sendFile(path.join(__dirname, '../client/build/index.html'));
-// });
-
+// This is the function that will start the Apollo Server. 
 async function startApolloServer(typeDefs, resolvers) {
   await server.start()
   server.applyMiddleware({app})

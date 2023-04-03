@@ -4,24 +4,23 @@ const { signToken } = require('../utils/auth');
 
 const resolvers = {
     Query: {
+      // This will query 'me' which will make sure that all data being changed is for the user that is logged in. It will search for the user's data by their _id.
         me: async (parent, args, context) => {
-            if (context.user) {
-                const userData = await User.findOne({ id: context.user._id })
-                .select('-__v -password')
-                // .populate('books')
-                return userData;
-            };
-
-             throw new AuthenticationError('Please login!');   
-            },
+          if (context.user) {
+            return User.findOne({ _id: context.user._id });
+          }
+          throw new AuthenticationError('You need to be logged in!');
+        },
         },
 
 Mutation: {
-    addUser: async (parent, args) => {
-      const user = await User.create(args);
+  // This is the mutation used for adding a new user to the database. It requires a username, email, and password. Once successful, the user will be created with a unique authorization token.
+    addUser: async (parent, { username, email, password }) => {
+      const user = await User.create({ username, email, password });
       const token = signToken(user);
       return { token, user };
     },
+    // This is the mutation for logging in, which requires an email and password to verify with the database. If successful, the user will be logged in to their account.
     login: async (parent, { email, password }) => {
       const user = await User.findOne({ email });
 
@@ -39,50 +38,26 @@ Mutation: {
       return { token, user };
     },
 
-
-
-    saveBook: async (parent, { userId, bookData }, context) => {
-        if (context.user) {
-       const updatedUser = await User.findByIdAndUpdate(
-        { _id: context.user._id},
-        { $push: { savedBooks: { userId, bookData }}},
-        { new: true }
-       );
-       return updatedUser;
+    // This is the mutation for saving a book to the user's savedBooks array. newBook holds the data for the book to be saved and will be added to the specific user's savedBooks array. runValidators is used to prevent duplicate entries.
+    saveBook: async (parent, { newBook }, context) => {
+      if (context.user) {
+        return User.findOneAndUpdate(
+          { _id: context.user._id },
+          { $addToSet: { savedBooks: newBook } },
+          { new: true, runValidators: true }
+        )
         }
         throw new AuthenticationError('You need to be logged in!');
     },
 
-    // saveBook: async (parent, { userId, bookData }, context) => {
-    //     if (context.user) {
-    //     // return addBookToUser = await User.create(
-    //         return User.findOneAndUpdate(
-    //         {
-    //              _id: userId 
-    //         },
-    //         {
-    //             $addToSet: { savedBooks: { book: bookData}}
-    //         },
-    //         { new: true, runValidators: true }
-    //     );
-    //     }
-    //     throw new AuthenticationError('You need to be logged in!');
-    // },
+    // This is the mutation for removing a book from a user's savedBooks array. It will search the user's savedBooks array and remove the entry that matches with the book-to-be-deleted's bookId.
     removeBook: async (parent, { bookId }, context) => {
-        if (context.user) {
-        const updateUser = User.findOneAndUpdate(
-
-            { 
-                _id: context.user._id 
-            },
-            {
-            $pull: {
-                savedBooks: { savedBooks: bookId }
-            },
-            },
+      if (context.user) {
+        return User.findOneAndUpdate(
+            { _id: context.user._id },
+            { $pull: { savedBooks: { bookId: bookId } } },
             { new: true }
         );
-        return updateUser;
         }
         throw new AuthenticationError('You need to be logged in!');
     },

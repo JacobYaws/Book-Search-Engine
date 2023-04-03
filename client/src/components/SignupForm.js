@@ -19,6 +19,7 @@ const SignupForm = () => {
   const [showAlert, setShowAlert] = useState(false);
   const [addUser, { error }] = useMutation(ADD_USER);
 
+  // This is used to show or hide an overlay containing error information if there is a problem in the code. 
   useEffect(() => {
     if (error) {
       setShowAlert(true)
@@ -42,6 +43,7 @@ const SignupForm = () => {
       event.stopPropagation();
     }
 
+    // addUser will add in the parameters from userFormData as variables to the User type and then assign a token to the user to activate their account.
     try {  
       const { data } = await addUser({
         variables: { ...userFormData },
@@ -53,6 +55,7 @@ const SignupForm = () => {
       
     }
 
+    // Resets the input fields after submission.
     setUserFormData({
       username: '',
       email: '',

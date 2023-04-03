@@ -6,17 +6,20 @@ const bookSchema = require('./Book');
 
 const userSchema = new Schema(
   {
+    // Holds the username for the account.
     username: {
       type: String,
       required: true,
       unique: true,
     },
+    // Holds the email, and checks to make sure it is a valid email address format.
     email: {
       type: String,
       required: true,
       unique: true,
       match: [/.+@.+\..+/, 'Must use a valid email address'],
     },
+    // Holds the password
     password: {
       type: String,
       required: true,

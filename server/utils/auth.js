@@ -6,17 +6,15 @@ const expiration = '2h';
 
 module.exports = {
   // function for our authenticated routes
-  authMiddleware: function ({ req }) {
-    // allows token to be sent via  req.query or headers
+  authMiddleware: async function ({ req }) {
+    // Allows the token to be sent from req.body, req.query, or headers.
     let token = req.body.token || req.query.token || req.headers.authorization;
 
-    // ["Bearer", "<tokenvalue>"]
     if (req.headers.authorization) {
       token = token.split(' ').pop().trim();
     }
 
     if (!token) {
-      // return res.status(400).json({ message: 'You have no token!' });
       return req;
     }
 
@@ -26,9 +24,7 @@ module.exports = {
       req.user = data;
     } catch {
       console.log('Invalid token');
-      // return res.status(400).json({ message: 'invalid token!' });
     }
-
     // send to next endpoint
     return req;
   },

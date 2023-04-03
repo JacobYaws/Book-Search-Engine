@@ -1,10 +1,5 @@
 const { gql } = require('apollo-server-express');
-// Came from 'type Query' above the 'me'
-// users: [User]!
-    // user(userId: ID!): User
-
-    // Came from type Mutation
-    // saveBook(criteria: SavedBookInput!): User
+// These are the type definitiions that will be used when querying data with graphql. This is used to ensure that the correct data is being passed through when using mutations.
 const typeDefs = gql`
 
 type Query {
@@ -12,10 +7,10 @@ type Query {
   }
 
   input SavedBookInput {
+    bookId: String
     authors: [String]
     description: String
     title: String
-    bookId: String
     image: String
     link: String
   }
@@ -23,7 +18,7 @@ type Query {
   type Mutation {
     login(email: String!, password: String!): Auth
     addUser(username: String!, email: String!, password: String!): Auth
-    saveBook(criteria: SavedBookInput): User
+    saveBook(newBook: SavedBookInput!): User
     removeBook(bookId: ID!): User
   }
 

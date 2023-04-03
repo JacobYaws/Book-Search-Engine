@@ -11,6 +11,7 @@ import SearchBooks from './pages/SearchBooks';
 import SavedBooks from './pages/SavedBooks';
 import Navbar from './components/Navbar';
 
+// Creates a link to graphql at the /graphql endpoint.
 const httpLink = createHttpLink({
   uri: '/graphql',
 });
@@ -25,11 +26,13 @@ const authLink = setContext((_, { headers }) => {
   };
 });
 
-const client = new ApolloClient({
+// Exports a new ApolloClient that will include the graphql link and cache for localstorage.
+export const client = new ApolloClient({
   link: authLink.concat(httpLink),
   cache: new InMemoryCache(),
-})
+});
 
+// This is the function to render the webpage. ApolloProvider is setup to server the client. Switch is used to toggle between pages depending on the endpoint. 
 function App() {
   return (
     <ApolloProvider client={client}>
@@ -37,10 +40,10 @@ function App() {
       <>
         <Navbar />
         <Switch>
-          <Route exact path='/' component={SearchBooks} />
-          <Route exact path='/saved' component={SavedBooks} />
+          <Route exact path="/" component={SearchBooks} />
+          <Route exact path="/saved" component={SavedBooks} />
           <Route render={() => <h1 className='display-2'>Wrong page!</h1>} />
-        </Switch>
+          </Switch>
       </>
     </Router>
     </ApolloProvider>

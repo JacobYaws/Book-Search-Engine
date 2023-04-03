@@ -7,24 +7,24 @@ import {
   Card,
   Row
 } from 'react-bootstrap';
-
 import Auth from '../utils/auth';
-import { saveBook, searchGoogleBooks } from '../utils/API';
 import { saveBookIds, getSavedBookIds } from '../utils/localStorage';
-import { useMutation } from '@apollo/client';
+// Imports the SAVE_BOOK mutation
 import { SAVE_BOOK } from '../utils/mutations';
+import { useMutation } from '@apollo/client';
 
 const SearchBooks = () => {
   // create state for holding returned google api data
   const [searchedBooks, setSearchedBooks] = useState([]);
   // create state for holding our search field data
   const [searchInput, setSearchInput] = useState('');
-
   // create state to hold saved bookId values
   const [savedBookIds, setSavedBookIds] = useState(getSavedBookIds());
+  
+  // Creates the mutation for saving a book to the user's savedBooks array. 
+  const [saveBook, { error }] = useMutation(SAVE_BOOK);
 
-  // set up useEffect hook to save `savedBookIds` list to localStorage on component unmount
-  // learn more here: https://reactjs.org/docs/hooks-effect.html#effects-with-cleanup
+  // Renders the saved books in the user's savedBooks array.
   useEffect(() => {
     return () => saveBookIds(savedBookIds);
   });
@@ -38,7 +38,7 @@ const SearchBooks = () => {
     }
 
     try {
-      const response = await searchGoogleBooks(searchInput);
+      const response = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${searchInput}`);
 
       if (!response.ok) {
         throw new Error('something went wrong!');
@@ -57,6 +57,7 @@ const SearchBooks = () => {
       setSearchedBooks(bookData);
       setSearchInput('');
     } catch (err) {
+      // console.error(error);
       console.error(err);
     }
   };
@@ -65,36 +66,36 @@ const SearchBooks = () => {
   const handleSaveBook = async (bookId) => {
     // find the book in `searchedBooks` state by the matching id
     const bookToSave = searchedBooks.find((book) => book.bookId === bookId);
-    const [save, { error, data }] = useMutation(SAVE_BOOK);
 
     // get token
     const token = Auth.loggedIn() ? Auth.getToken() : null;
-
     if (!token) {
       return false;
     }
-
+    // Runs the saveBook mutation and will save the new book to be saved into the user's savedBooks array.
     try {
-      const response = await saveBook(bookToSave, token);
-      
-      if (!response.ok) {
-        throw new Error('something went wrong!');
-      }
+        const { data } = await saveBook({
+        variables: { newBook: bookToSave },
+      });
 
       // if book successfully saves to user's account, save book id to state
       setSavedBookIds([...savedBookIds, bookToSave.bookId]);
     } catch (err) {
       console.error(err);
+      // console.log(bookId);
+      console.log(savedBookIds);
+      console.log(bookToSave.bookId)
     }
   };
 
   return (
     <>
-      <div fluid className='text-light bg-dark pt-5'>
+      <div className='text-light bg-dark pt-5'>
         <Container>
           <h1>Search for Books!</h1>
           <Form onSubmit={handleFormSubmit}>
-            <Form.Row>
+            {/* Deleted Form.Row as that was causing errors with rendering the webpage. */}
+            <Row>
               <Col xs={12} md={8}>
                 <Form.Control
                   name='searchInput'
@@ -110,7 +111,7 @@ const SearchBooks = () => {
                   Submit Search
                 </Button>
               </Col>
-            </Form.Row>
+            </Row>
           </Form>
         </Container>
       </div>
@@ -124,8 +125,8 @@ const SearchBooks = () => {
         <Row>
           {searchedBooks.map((book) => {
             return (
-              <Col md="4">
-                <Card key={book.bookId} border='dark'>
+              <Col key={book.bookId} md="4">
+                <Card border='dark'>
                   {book.image ? (
                     <Card.Img src={book.image} alt={`The cover for ${book.title}`} variant='top' />
                   ) : null}
@@ -150,8 +151,9 @@ const SearchBooks = () => {
           })}
         </Row>
       </Container>
-    </>
+      </>
   );
 };
 
 export default SearchBooks;
+
