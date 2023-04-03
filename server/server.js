@@ -7,8 +7,7 @@ const db = require('./config/connection');
 require("dotenv").config();
 
 const app = express();
-// const PORT = process.env.PORT || 3001;
-const port = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3001;
 
 // server will hold the typeDefs, resolvers, and context needed to start the application. Playground and introspection were also added to get the /graphql endpoint to work.
 const server = new ApolloServer({
