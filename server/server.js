@@ -27,7 +27,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // Directs the webpage to display /client/build/index.html when at the '/' endpoint.
-app.get('/', (req, res) => {
+app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../client/build/index.html'))
 })
 
