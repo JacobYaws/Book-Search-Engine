@@ -24,8 +24,8 @@ After the install is complete, run 'npm run build' and then 'npm start' to start
 
 ## Screenshots
 
-<img src="">
-<img src="">
+<img src="https://github.com/JacobYaws/Book-Search-Engine/blob/main/assets/Assign21screenshot1.png">
+<img src="https://github.com/JacobYaws/Book-Search-Engine/blob/main/assets/Assign21screenshot2.png">
 
 ## Links
 
